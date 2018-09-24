@@ -23,7 +23,9 @@ class Resolver:
         # Loop through all "resolvers" until one responds with an answer
         for resolver in resolver_list:
             response = dns.query.udp(m, resolver, config.TIMEOUT)
+            #print(response)
             return response
+        print("returning false")
         return False
 
     @staticmethod
@@ -52,11 +54,11 @@ class Resolver:
 
     def resolve(self):
         response = self.resolve_iteration(self.root_servers)  # type:dns.message.Message
-        while not response.answer:
+        while (response.flags & dns.flags.AA) != dns.flags.AA:
             resolvers = self.get_resolvers(response)
             response = self.resolve_iteration(resolvers)
-        for rrset in response.answer:
-            print(rrset)
+        # for rrset in response.answer:
+        #     print(rrset)
         return response
 
 
@@ -74,11 +76,13 @@ mydig <url> <record_type>
         print("{0}\t\tIN\t{1}".format(url, type))
 
     @staticmethod
-    def print_result(result):
+    def print_result(qresult):
         print("ANSWER SECTION:")
-        for rrset in result.answer:
+        for rrset in qresult.answer:
             print(rrset)
-
+        if not qresult.answer:
+            for rrset in qresult.authority:
+                print(rrset)
 
     @staticmethod
     def print(result, url, type="A"):
