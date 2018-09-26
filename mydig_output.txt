@@ -1,0 +1,42 @@
+python3 mydig.py wikipedia.org A
+
+QUESTION SECTION:
+wikipedia.org           IN      A
+ANSWER SECTION:
+wikipedia.org. 600 IN A 208.80.153.224
+
+MSG SIZE:  70
+Time taken: 0.11186528205871582 s
+
+
+
+
+
+python3 mydig.py wikipedia.org MX
+
+QUESTION SECTION:
+wikipedia.org           IN      MX
+ANSWER SECTION:
+wikipedia.org. 3600 IN MX 10 mx1001.wikimedia.org.
+wikipedia.org. 3600 IN MX 50 mx2001.wikimedia.org.
+ADDITIONAL SECTION
+mx1001.wikimedia.org. 3600 IN A 208.80.154.76
+mx2001.wikimedia.org. 3600 IN A 208.80.153.45
+
+MSG SIZE:  142
+Time taken: 0.3288142681121826 s
+
+
+
+
+python3 mydig.py wikipedia.org NS
+
+QUESTION SECTION:
+wikipedia.org           IN      NS
+ANSWER SECTION:
+wikipedia.org. 86400 IN NS ns0.wikimedia.org.
+wikipedia.org. 86400 IN NS ns1.wikimedia.org.
+wikipedia.org. 86400 IN NS ns2.wikimedia.org.
+
+MSG SIZE:  118
+Time taken: 0.1028444766998291 s

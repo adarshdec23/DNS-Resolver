@@ -12,3 +12,33 @@ root_servers = ["198.41.0.4",
                 "199.7.83.42",
                 "202.12.27.33"]
 TIMEOUT = 5
+
+top_25 = [
+    "Google.com",
+    "Youtube.com",
+    "Facebook.com",
+    "Baidu.com",
+    "Wikipedia.org",
+    "Yahoo.com",
+    "Qq.com",
+    "Taobao.com",
+    "Tmall.com",
+    "Twitter.com",
+    "Google.co.in",
+    "Amazon.com",
+    "Instagram.com",
+    "Vk.com",
+    "Reddit.com",
+    "Sohu.com",
+    "Jd.com",
+    "Live.com",
+    "Yandex.ru",
+    "Weibo.com",
+    "Sina.com.cn",
+    "Google.co.jp",
+    "360.cn",
+    "Login.tmall.com",
+    "Blogspot.com"
+]
+
+no_runs = 10

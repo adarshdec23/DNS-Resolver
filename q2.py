@@ -2,7 +2,6 @@ from dns.resolver import dns
 import dns.query, dns.message
 from config import config
 import sys
-import pdb
 
 
 class Resolver:
@@ -36,6 +35,12 @@ class Resolver:
 
     @staticmethod
     def get_rrset(section, rdatatype):
+        """
+        Get the rrset with the rdatatype
+        :param section: List of rrset
+        :param rdatatype: dns.radatatype
+        :return: list of rrest
+        """
         for rrset in section:
             for rr in rrset:
                 if rr.rdtype == rdatatype:
@@ -43,6 +48,12 @@ class Resolver:
         return False
 
     def make_ds(self, answer, sec_part_of_url):
+        """
+        Method to create a digital signature.
+        :param answer: RRset with answer section
+        :param sec_part_of_url: The url to verify
+        :return: list of DS
+        """
         keyrrset = answer[0]
         ds = []
         for rr in keyrrset:
@@ -50,10 +61,16 @@ class Resolver:
         return ds
 
     def validate(self, response, key_response, sec_part_of_url):
+        """
+        Check whether the response received is secure.
+        :param response: The "regular" response
+        :param key_response: The response to the "DNSKEY" query
+        :param sec_part_of_url: Url to verify
+        :return: True if valid, False other wise
+        """
         if self.ds_start:
             self.ds_start = False
             self.ds_stack.insert(0, response.authority[1][0])
-            print("Doing nothing for root. Ideally check against the locally saved/bootstrapped root keys.")
             return True
         # Not root, we have something to validate against
         if self.ds_stack:
@@ -61,52 +78,49 @@ class Resolver:
             ds_list = self.make_ds(key_response.answer, sec_part_of_url)
             for ds in ds_list:
                 if ds == parent_ds:
-                    print(ds, "||||", parent_ds)
-                    print("Validated!!!!!!")
                     return True
         # We are at the end. Check A record
         else:
             try:
                 dns.dnssec.validate(response.answer[0], response.answer[1], {dns.name.from_text(sec_part_of_url): key_response.answer[0]})
-                print("Validated last record")
                 return True
             except (dns.dnssec.ValidationFailure, Exception) as e:
-                print(e)
-        print("Did not validate")
+                # print(e)
+                pass
         return False
 
     def is_nsec(self, response):
+        """
+        Check whether DNSSEC is supported
+        :param response: response to check
+        :return: bool
+        """
         for rrset in response.authority:
             for rr in rrset:
+                # If we have NSEC or NSEC3 records, check whether it contains RRSIG/DNSKEY.
+                # If it does, that means the child does not support DNSSEC
                 if rr.rdtype == dns.rdatatype.NSEC or rr.rdtype == dns.rdatatype.NSEC3:
-                    if rr.to_text().find("DNSKEY") > -1 or rr.to_text().find("RRSIG"):
+                    if rr.to_text().find("DNSKEY") > -1 or rr.to_text().find("RRSIG") > -1:
                         return True
         return False
 
     def resolve_iteration(self, url_to_resolve, resolver_list) -> dns.message.Message:
         m = dns.message.make_query(self.url, self.type, want_dnssec=True)
         # Loop through all "resolvers" until one responds with an answer
-        print(resolver_list)
         for resolver in resolver_list:
             response = dns.query.udp(m, resolver, config.TIMEOUT)
-            print(response)
-            print("-"*60)
-            if (response.flags & dns.flags.AA) != dns.flags.AA and flagsself.is_nsec(response):
+            if (response.flags & dns.flags.AA) != dns.flags.AA and self.is_nsec(response):
                 print("DNSSEC not supported")
                 exit(0)
             # Make a request for the DNS key
-            print("Querying for: ", url_to_resolve)
             url_to_resolve = '.'+url_to_resolve
             sec_url_part = url_to_resolve[url_to_resolve.find(".")+1:]
-            print("*"*10, sec_url_part)
             key_message = dns.message.make_query(dns.name.from_text(sec_url_part), dns.rdatatype.DNSKEY, want_dnssec=True)
             key_response = dns.query.udp(key_message, resolver, config.TIMEOUT)
-            print(key_response)
             if not self.validate(response, key_response, sec_url_part):
                 print("DNSSec verification failed")
                 exit(0)
             return response
-        print("returning false")
         return False
 
     @staticmethod
@@ -136,20 +150,17 @@ class Resolver:
     def resolve(self):
         current_url = self.get_next_url_part()
         response = self.resolve_iteration(current_url, self.root_servers)  # type:dns.message.Message
-        print("\n" * 5)
-        while (str(current_url) != str(self.url)) or (response.flags & dns.flags.AA) != dns.flags.AA:
+        while (response.flags & dns.flags.AA) != dns.flags.AA:
             resolvers = self.get_resolvers(response)
             current_url = self.get_next_url_part()
-            print("CURRENT URL: ", current_url, "self.url", self.url)
             response = self.resolve_iteration(current_url, resolvers)
-            print("\n"*5)
         return response
 
 
 class Printer:
     @staticmethod
     def print_help():
-        print("""mydig can be run using the following parameters:
+        print("""q2.py can be run using the following parameters:
 mydig <url> <record_type>
     url: The url to resolve
     record_type: The type of record to resolve. Currently "A", "MX" and "NS" are supported""")
@@ -182,5 +193,5 @@ if __name__ == '__main__':
     rec_type = sys.argv[2] if len(sys.argv) > 2 else "A"
     r = Resolver(url, rec_type)
     result = r.resolve()
-    #Printer.print(result, url, rec_type)
+    Printer.print(result, url, rec_type)
 
