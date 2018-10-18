@@ -9,7 +9,7 @@ MSG SIZE:  70
 Time taken: 0.11186528205871582 s
 
 
-
+------------------------------------------------------------------------
 
 
 python3 mydig.py wikipedia.org MX
@@ -27,6 +27,7 @@ MSG SIZE:  142
 Time taken: 0.3288142681121826 s
 
 
+------------------------------------------------------------------------
 
 
 python3 mydig.py wikipedia.org NS
@@ -37,6 +38,10 @@ ANSWER SECTION:
 wikipedia.org. 86400 IN NS ns0.wikimedia.org.
 wikipedia.org. 86400 IN NS ns1.wikimedia.org.
 wikipedia.org. 86400 IN NS ns2.wikimedia.org.
+ADDITIONAL SECTION
+ns0.wikimedia.org. 3600 IN A 208.80.154.238
+ns1.wikimedia.org. 3600 IN A 208.80.153.231
+ns2.wikimedia.org. 3600 IN A 91.198.174.239
 
-MSG SIZE:  118
-Time taken: 0.1028444766998291 s
+MSG SIZE:  166
+Time taken: 0.5238158702850342 s
